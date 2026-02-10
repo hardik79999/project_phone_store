@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="mb-0">{{ action }} Product</h3>
+                </div>
+                <div class="card-body">
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+
+                        <div class="mb-4">
+                            <h5 class="text-secondary border-bottom pb-2">Basic Details</h5>
+                            
+                            {% if form.errors %}
+                                <div class="alert alert-danger">
+                                    {{ form.errors }}
+                                </div>
+                            {% endif %}
+
+                            {{ form.as_p }}
+                        </div>
+
+                        <div class="mb-4 p-3 bg-light rounded">
+                            <h5 class="text-secondary border-bottom pb-2">Specifications (RAM, Color, etc.)</h5>
+                            
+                            {{ formset.management_form }}
+
+                            <div id="specs-container">
+                                {% for form in formset %}
+                                    
+                                    {% for hidden in form.hidden_fields %}
+                                        {{ hidden }}
+                                    {% endfor %}
+                                    <div class="row mb-2 align-items-center">
+                                        <div class="col">
+                                            {{ form.key_name }}
+                                        </div>
+                                        <div class="col">
+                                            {{ form.value }}
+                                        </div>
+                                        
+                                        {% if formset.can_delete %}
+                                            <div class="col-auto">
+                                                <div class="form-check">
+                                                    {{ form.DELETE }}
+                                                    <label class="form-check-label text-danger small">Delete?</label>
+                                                </div>
+                                            </div>
+                                        {% endif %}
+                                    </div>
+
+                                    {% if form.errors %}
+                                        <div class="text-danger small mb-2">
+                                            {{ form.errors }}
+                                        </div>
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+                            <small class="text-muted">* Khali box bharke naya spec add kar sakte ho.</small>
+                        </div>
+
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a href="{% url 'product_list' %}" class="btn btn-secondary me-2">Cancel</a>
+                            <button type="submit" class="btn btn-success px-4">Save Product</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const nameInput = document.getElementById('id_name');
+    const slugInput = document.getElementById('id_slug');
+
+    if (nameInput && slugInput) {
+        nameInput.addEventListener('keyup', function() {
+            // Sirf tab auto-fill karo agar hum Naya Product bana rahe hain
+            // Ya agar user ne slug ko manually change nahi kiya hai
+            let val = nameInput.value;
+            val = val.toLowerCase()
+                     .replace(/ /g, '-')      // Space ko hyphen banao
+                     .replace(/[^\w-]+/g, ''); // Special chars hatao
+            
+            slugInput.value = val;
+        });
+    }
+</script>
+{% endblock %}
